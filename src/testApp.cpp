@@ -15,17 +15,22 @@ void testApp::setup(){
     currentTrack = -1;
     
     tempo = 120.0;
+    //Audio
+    ofxAudioUnitSampler AlchemyPlayer('aumu', 'CaC2', 'CamA');
     
-        //Audio
-    sampler = ofxAudioUnitSampler('aumu', 'CaC2', 'CamA');
-//    sampler.setChannel(10);
-    //sampler.setBank(2, 0);
-    prog = 0;
-    sampler.setProgram(prog);
-//    sampler.getParameters(true, true);
+    sampler.assign(3, AlchemyPlayer);
+    sampler[0].loadCustomPreset("distressed_kit");
+    sampler[1].loadCustomPreset("dubstep_bio_kit");
+    sampler[2].loadCustomPreset("dubstep_drum_kit");
+    cout << "sampler0 " << sampler[0].midiChannelInUse << endl
+         << "sampler1 " << sampler[1].midiChannelInUse << endl
+        << "sampler2 " << sampler[2].midiChannelInUse << endl;
     
-    //cout << "preset status: " + ofToString(sampler.loadCustomPreset(ofToDataPath("dubstep_drum_kit"))) << endl;
-    sampler.connectTo(output);
+    mixer.setInputBusCount(3);
+    sampler[0].connectTo(mixer, 0);
+    sampler[1].connectTo(mixer, 1);
+    sampler[2].connectTo(mixer, 2);
+    mixer.connectTo(output);
     output.start();
 }
 
@@ -36,19 +41,24 @@ void testApp::update(){
         currentTrack = thisFrameTrack;
         if (currentTrack != -1) {
             currentMidiFile = population->getMidifile(currentTrack);
+            int currentTime = currentMidiFile->getEvent(1, 0).time;
+            float alarmMS = applyTempo(currentTime, currentMidiFile);
             timer = new ofxTimer;
-            timer->setAlarm(0);
-            lastNoteTime = 0.0;
+            timer->setAlarm(alarmMS);
+            lastNoteTime = 0;
             eventCounter = 0;
+            noteOnCounter = 0;
             timeCounter = 0.0;
             tempo = population->getTempo(currentTrack);
             ofVec2f remix = population->getRemix(currentTrack);
+            progs.clear();
+            progs = population->getProgs(currentTrack);
       
 //            int prog = ofMap(remix.y, 0.0, 1.0, 0, 11);
-            sampler.setProgram(population->getProg(currentTrack));
+//            sampler.setProgram(population->getProg(currentTrack));
             
-            sampler.setParameter(16, kAudioUnitScope_Global, remix.x);
-            sampler.setParameter(17, kAudioUnitScope_Global, remix.y);
+//            sampler.setParameter(16, kAudioUnitScope_Global, remix.x);
+//            sampler.setParameter(17, kAudioUnitScope_Global, remix.y);
             
 //            int command = 0;
 //            // check for tempo
@@ -76,41 +86,74 @@ void testApp::draw(){
 
 void testApp::audioOut(float *input, int bufferSize, int nChannels) {
     //play midi
+    
     if (currentTrack != -1) {
+
         if (timer->alarm()) {
+
+            
+            int note = currentMidiFile->getEvent(1, eventCounter).data[1];
+            int vel = currentMidiFile->getEvent(1, eventCounter).data[2];
+            
+            cout << "event " << eventCounter;
+            
             if (currentMidiFile->getEvent(1, eventCounter).isNoteOn()) {
-                sampler.midiNoteOn(currentMidiFile->getEvent(1, eventCounter).data[1], currentMidiFile->getEvent(1, eventCounter).data[2]);
-                lastNoteTime = currentMidiFile->getEvent(1, eventCounter).time;
+                //int prog = ofMap(progs[noteOnCounter], 0.0, 1.0, 0, 2);
+                int prog = int(progs[noteOnCounter] * 3 - 0.01);
+                sampler[prog].midiNoteOn(note, vel);
+                notePlayed temp;
+                temp.note = note;
+                temp.prog = prog;
+                notesPlayed.push_back(temp);
+                noteOnCounter++;
+                cout << " noteON " << "prog " << prog;
             }
             
             if (currentMidiFile->getEvent(1, eventCounter).isNoteOff()) {
-                sampler.midiNoteOff(currentMidiFile->getEvent(1, eventCounter).data[1], currentMidiFile->getEvent(1, eventCounter).data[2]);
-                lastNoteTime = currentMidiFile->getEvent(1, eventCounter).time;
+                int prog;
+                for (int i = 0; i < notesPlayed.size(); i++) {
+                    if (notesPlayed[i].note == note) {
+                        prog = notesPlayed[i].prog;
+                        notesPlayed.erase(notesPlayed.begin() + i);
+                        break;
+                    }
+                }
+                sampler[prog].midiNoteOff(note, vel);
+                cout << " noteOff " << "prog " << prog;
             }
+            cout << " note " << note << "vel " << vel << endl;
             
-            
+
             float alarmMS;
             eventCounter++;
             if (eventCounter < currentMidiFile->getNumEvents(1)) {
-                
+                int currentTime = currentMidiFile->getEvent(1, eventCounter).time;
+                cout << "currentime " << currentTime << endl;
+                cout << "lastTime " << lastNoteTime << endl;
                 if (eventCounter == 0) {
-                    alarmMS = applyTempo(currentMidiFile->getEvent(1, eventCounter).time, currentMidiFile);
-//                    alarmMS-= (loopBeginErr + loopEndErr);
+                    alarmMS = applyTempo(currentTime, currentMidiFile);
                 }
                 else {
-                    alarmMS = applyTempo(currentMidiFile->getEvent(1, eventCounter).time - lastNoteTime, currentMidiFile);
+                    alarmMS = applyTempo(currentTime - lastNoteTime, currentMidiFile);
+                    cout << "alarmMS pre " << alarmMS << endl;
                     alarmMS-= timer->getDiffA();
+                    cout << "alarmMS post " << alarmMS << endl << endl;
                 }
                 if (alarmMS > 0) {
                     timer->setAlarm(alarmMS);
                     timeCounter+=alarmMS;
                 }
-                //cout << "track " << track << " event " << eventCounter[track] << " time " << alarmMS << endl;
                 
+                //cout << "track " << track << " event " << eventCounter[track] << " time " << alarmMS << endl;
+                lastNoteTime = currentTime;
             }
             else {
                 eventCounter = 0;
-                alarmMS = applyTempo(960, currentMidiFile) - timeCounter;
+                noteOnCounter = 0;
+                
+                int endOfLoop = 960 - lastNoteTime;
+                alarmMS = applyTempo(endOfLoop + currentMidiFile->getEvent(1, 0).time, currentMidiFile);
+                cout << "elapsed time " << timeCounter << " last alarm : " << alarmMS << endl;
                 timer->setAlarm(alarmMS);
                 timeCounter = 0.0;
                 //song done start over
@@ -152,22 +195,9 @@ void testApp::keyPressed(int key){
     }
     
     if (key == 's') {
-        sampler.showUI();
+        sampler[0].showUI();
     }
     
-    if (key == OF_KEY_LEFT) {
-        prog--;
-        if (prog < 0) prog = 0;
-
-        sampler.setProgram(prog);
-    }
-    
-    if (key == OF_KEY_RIGHT) {
-        prog++;
-        if (prog > 20) prog = 20;
-
-        sampler.setProgram(prog);
-    }
 }
 
 //--------------------------------------------------------------

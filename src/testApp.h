@@ -5,6 +5,11 @@
 #include "ofxTimer.h"
 #include "ofxAudioUnit.h"
 
+struct notePlayed {
+    int note;
+    int prog;
+};
+
 class testApp : public ofBaseApp{
 public:
     void setup();
@@ -37,11 +42,15 @@ public:
     double      tempo;
     ofxTimer  * timer;
     int         eventCounter;
+    int         noteOnCounter;
     float       timeCounter;
     float       lastNoteTime;
     MidiFile * currentMidiFile;
-    int prog;
+    vector<float> progs;
+    vector<notePlayed> notesPlayed;
     
-    ofxAudioUnitSampler sampler;
+    
+    vector<ofxAudioUnitSampler> sampler;
+    ofxAudioUnitMixer mixer;
     ofxAudioUnitOutput  output;
 };

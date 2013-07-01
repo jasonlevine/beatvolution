@@ -22,6 +22,7 @@ public:
     float getTempo() { return tempo; }
     ofVec2f getRemix() { return ofVec2f(remixX, remixY); }
     int getProg() { return prog; }
+    vector<float> getProgs();
     
 private:
     DNA dna;

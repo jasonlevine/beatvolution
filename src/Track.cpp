@@ -27,10 +27,10 @@ void Track::createMidiFile() {
     int tpq = 120;              // default value in MIDI file is 48
     outputFile->setTicksPerQuarterNote(tpq);
     
-    tempo = ofMap(dna.genes[48], 0.0, 1.0, 90, 150);
-    remixX = dna.genes[49];
-    remixY = dna.genes[50];
-    prog = ofMap(dna.genes[51], 0.0, 1.0, 0, 11);
+    tempo = ofMap(dna.genes[64], 0.0, 1.0, 120, 180);
+    remixX = dna.genes[65];
+    remixY = dna.genes[66];
+    prog = ofMap(dna.genes[67], 0.0, 1.0, 0, 2);
     
     
     
@@ -50,19 +50,32 @@ void Track::createMidiFile() {
     
     int actiontime = 0;      
     for (int i = 0; i < 16; i++) {
-        actiontime = tpq * ofMap(dna.genes[i], 0.0, 1.0, 0, 8);
-        midievent[0] = 0x8A;     // store a note on command (MIDI channel 1)
+        actiontime = tpq / 2 * int(ofMap(dna.genes[i], 0.0, 1.0, 0, 16));
+        midievent[0] = 0x9A;     // store a note on command (MIDI channel 1)
         midievent[1] = ofMap(dna.genes[i+16], 0.0, 1.0, 36, 89); //c1 to f5
         midievent[2] = ofMap(dna.genes[i+32], 0.0, 1.0, 0, 127);       // store attack/release velocity for note command
-//        midievent[3] = ofMap(dna.genes[i+48], 0.0, 1.0, 0, 2);
         outputFile->addEvent(1, actiontime, midievent);
+        cout <<  actiontime << " NoteOn" << int(midievent[1]) << " " << int(midievent[2]) << endl;
         
-        midievent[0] = 0x9A;     // store a note off command (MIDI channel 1)
-        
-        outputFile->addEvent(1, actiontime+tpq, midievent);
+        actiontime+= tpq / 2;
+        midievent[0] = 0x8A;     // store a note off command (MIDI channel 1)
+        outputFile->addEvent(1, actiontime, midievent);
+        cout <<  actiontime << " NoteOff" << int(midievent[1]) << " " << int(midievent[2]) << endl;
     }
     
+    
     outputFile->sortTracks();         // make sure data is in correct order
+    cout << endl;
+    for (int i = 0;  i < outputFile->getNumEvents(1); i++) {
+        cout << outputFile->getEvent(1, i).time << " ";
+        if (outputFile->getEvent(1, i).isNoteOn()) cout << "noteON ";
+        if (outputFile->getEvent(1, i).isNoteOff()) cout << "noteOFF ";
+        
+        cout  << int(outputFile->getEvent(1, i).data[1]) << " " << int(outputFile->getEvent(1, i).data[2]) << endl;
+    }
+    
+    
+    
     
 //    string filename = ofToDataPath(ofGetTimestampString() + ".mid");
 //    outputFile->write(filename.c_str());
@@ -98,4 +111,12 @@ DNA Track::getDNA() {
 
 float Track::getFitness() {
     return fitness;
+}
+
+vector<float> Track::getProgs(){
+    vector<float> progs;
+    for (int i = 0;  i < 16; i++) {
+        progs.push_back(dna.genes[i+48]);
+    }
+    return progs;
 }
