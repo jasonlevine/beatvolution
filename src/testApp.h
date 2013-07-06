@@ -5,6 +5,7 @@
 #include "ofxTimer.h"
 #include "ofxAudioUnit.h"
 
+
 struct notePlayed {
     int note;
     int prog;
@@ -15,6 +16,10 @@ public:
     void setup();
     void update();
     void draw();
+    void audioOut(float * input, int bufferSize, int nChannels);
+    
+    void setTempo(MidiFile& midifile, int index, double& tempo);
+    float applyTempo(float ms, MidiFile * file) { return ms * 60.0f / tempo / file->getTicksPerQuarterNote() * 1000.0f; } ;
     
     void keyPressed(int key);
     void keyReleased(int key);
@@ -26,9 +31,8 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     
-    void audioOut(float * input, int bufferSize, int nChannels);
-    void setTempo(MidiFile& midifile, int index, double& tempo);
-    float applyTempo(float ms, MidiFile * file) { return ms * 60.0f / tempo / file->getTicksPerQuarterNote() * 1000.0f; } ;
+    
+   
     
     
     ofSoundStream soundStream;

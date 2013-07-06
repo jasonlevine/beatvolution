@@ -77,10 +77,14 @@ void Track::createMidiFile() {
     
     
     
-//    string filename = ofToDataPath(ofGetTimestampString() + ".mid");
-//    outputFile->write(filename.c_str());
+
     
     
+}
+
+void Track::exportMidiFile(string name) {
+    string filename = ofToDataPath(name + ".mid");
+    outputFile->write(filename.c_str());
 }
 
 void Track::draw() {

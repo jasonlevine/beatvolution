@@ -36,6 +36,11 @@ int Population::rollover(int mouseX, int mouseY) {
     return -1;
 }
 
+void Population::exportTrack(int track, string name) {
+    population[track].exportMidiFile(name);
+}
+
+
 // Generate a mating pool
 void Population::selection() {
     // Clear the ArrayList
@@ -96,3 +101,62 @@ float Population::getMaxFitness() {
     return record;
 }
 
+
+
+//saving
+//--------------------------------------------------------------
+void Population::saveSession() {
+    session.clear();
+    
+    session.addTag("mutationRate");
+    session.setValue("mutationRate", mutationRate);
+    
+    session.addTag("generations");
+    session.setValue("generations", generations);
+    
+    int numGenes = population[0].dna.num;
+    session.addTag("numGenes");
+    session.setValue("numGenes", numGenes);
+    
+    session.addTag("Tracks");
+    session.pushTag("Tracks");
+    for (int i = 0; i < population.size(); i++){
+        
+        session.addTag("Track" + ofToString(i));
+        session.pushTag("Track" + ofToString(i));
+        session.addTag("fitness");
+        session.setValue("fitness", population[i].getFitness());
+        for (int j = 0; j < numGenes; j++) {
+            session.addTag("gene" + ofToString(j));
+            session.setValue("gene" + ofToString(j), population[i].dna.genes[j]);
+        }
+        session.popTag();
+    }
+    session.popTag();
+    
+    session.saveFile("session.xml");
+    cout << "session saved" << endl;
+}
+
+//--------------------------------------------------------------
+void Population::loadSession() {
+    session.loadFile("session.xml");
+    mutationRate = session.getValue("mutationRate", 0.05);
+    generations = session.getValue("generations", 1);
+    int numGenes = session.getValue("numGenes", 68);
+    
+    session.pushTag("Tracks");
+    for (int i = 0; i < population.size(); i++) {
+        session.pushTag("Track" + ofToString(i));
+        population[i].setFitness(session.getValue("fitness", 1.0));
+        for (int j = 0; j < numGenes; j++) {
+            population[i].dna.genes[j] = session.getValue("gene" + ofToString(j), 0.0);
+        }
+        population[i].createMidiFile();
+        session.popTag();
+    }
+    session.popTag();
+    
+    cout << "session loaded" << endl;
+    
+}

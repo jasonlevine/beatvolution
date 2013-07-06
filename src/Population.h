@@ -8,16 +8,21 @@
 
 #include "ofMain.h"
 #include "Track.h"
+#include "ofxXmlSettings.h"
+
 
 class Population {
 public:
     
     Population(float m, int num);
+    //GUI
     void draw();
     int rollover(int mouseX, int mouseY);
+    //GA
     void calcFitness();
     void selection();
     void reproduction();
+    //Getters
     int getGenerations();
     float getMaxFitness();
     MidiFile * getMidifile(int track) { return population[track].getMidifile(); }
@@ -25,11 +30,13 @@ public:
     ofVec2f getRemix(int track) { return population[track].getRemix(); }
     int getProg(int track) { return population[track].getProg(); }
     vector<float> getProgs( int track) { return population[track].getProgs(); }
-    vector<float> target;
-    
-    
-    
+    // Savers
+    void exportTrack(int track, string name);
+    void saveSession();
+    void loadSession();
+        
 private:
+    ofxXmlSettings session;
     
     float mutationRate;           // Mutation rate
     vector<Track> population;            // array to hold the current population

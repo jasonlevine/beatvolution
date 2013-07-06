@@ -91,6 +91,10 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
 
         if (timer->alarm()) {
 
+            cout << "contents of notePlayed" << endl;
+            for (int i  = 0; i < notesPlayed.size(); i++) {
+                cout << "note " << notesPlayed[i].note << " prog " << notesPlayed[i].prog << endl;
+            }
             
             int note = currentMidiFile->getEvent(1, eventCounter).data[1];
             int vel = currentMidiFile->getEvent(1, eventCounter).data[2];
@@ -111,17 +115,26 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
             
             if (currentMidiFile->getEvent(1, eventCounter).isNoteOff()) {
                 int prog;
+                bool noteFound = false;
                 for (int i = 0; i < notesPlayed.size(); i++) {
                     if (notesPlayed[i].note == note) {
                         prog = notesPlayed[i].prog;
                         notesPlayed.erase(notesPlayed.begin() + i);
+                        noteFound = true;
                         break;
                     }
                 }
-                sampler[prog].midiNoteOff(note, vel);
-                cout << " noteOff " << "prog " << prog;
+                if (noteFound) {
+                    sampler[prog].midiNoteOff(note, vel);
+                    cout << " noteOff " << "prog " << prog;
+                }
+                else {
+                    cout << "note not found" << endl;
+                }
+                
             }
             cout << " note " << note << "vel " << vel << endl;
+        
             
 
             float alarmMS;
@@ -143,6 +156,9 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
                     timer->setAlarm(alarmMS);
                     timeCounter+=alarmMS;
                 }
+                else {
+                    timer->setAlarm(0);
+                }
                 
                 //cout << "track " << track << " event " << eventCounter[track] << " time " << alarmMS << endl;
                 lastNoteTime = currentTime;
@@ -162,6 +178,9 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
     }
 
 }
+
+
+
 
 //--------------------------------------------------------------
 void testApp::setTempo(MidiFile& midifile, int index, double& tempo) {
@@ -198,6 +217,15 @@ void testApp::keyPressed(int key){
         sampler[0].showUI();
     }
     
+    
+    if (key == 'S') {
+        population->saveSession();
+    }
+    
+    if (key == 'L') {
+        population->loadSession();
+    }
+
 }
 
 //--------------------------------------------------------------
@@ -222,7 +250,10 @@ void testApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
-
+    if (currentTrack != -1) {
+        string name = "Gen" + ofToString(population->getGenerations()) + "Track" + ofToString(currentTrack);
+        population->exportTrack(currentTrack, name);
+    }
 }
 
 //--------------------------------------------------------------

@@ -13,8 +13,10 @@ class Track {
 public:
     Track(DNA _dna, ofVec2f _pos);
     void createMidiFile();
+    void exportMidiFile(string name);
     void draw();
     float getFitness();
+    void setFitness(float fit) { fitness = fit; }
     DNA getDNA();
     void rollover(int mouseX, int mouseY);
     bool isPlaying() { return playing; }
@@ -24,8 +26,10 @@ public:
     int getProg() { return prog; }
     vector<float> getProgs();
     
-private:
     DNA dna;
+    
+private:
+    
     float fitness;
     ofVec2f pos;
     int size;
