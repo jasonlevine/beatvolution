@@ -27,7 +27,7 @@ void Track::createMidiFile() {
     int tpq = 120;              // default value in MIDI file is 48
     outputFile->setTicksPerQuarterNote(tpq);
     
-    tempo = ofMap(dna.genes[64], 0.0, 1.0, 120, 180);
+    tempo = ofMap(dna.genes[64], 0.0, 1.0, 60, 160);
     remixX = dna.genes[65];
     remixY = dna.genes[66];
     prog = ofMap(dna.genes[67], 0.0, 1.0, 0, 2);
@@ -50,7 +50,7 @@ void Track::createMidiFile() {
     
     int actiontime = 0;      
     for (int i = 0; i < 16; i++) {
-        actiontime = tpq / 2 * int(ofMap(dna.genes[i], 0.0, 1.0, 0, 16));
+        actiontime = tpq / 4 * int(ofMap(dna.genes[i], 0.0, 1.0, 0, 16));
         midievent[0] = 0x9A;     // store a note on command (MIDI channel 1)
         midievent[1] = ofMap(dna.genes[i+16], 0.0, 1.0, 36, 89); //c1 to f5
         midievent[2] = ofMap(dna.genes[i+32], 0.0, 1.0, 0, 127);       // store attack/release velocity for note command

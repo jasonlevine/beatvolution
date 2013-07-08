@@ -50,10 +50,16 @@ void testApp::update(){
             noteOnCounter = 0;
             timeCounter = 0.0;
             tempo = population->getTempo(currentTrack);
-            ofVec2f remix = population->getRemix(currentTrack);
             progs.clear();
             progs = population->getProgs(currentTrack);
-      
+
+            
+//            ofVec2f remix = population->getRemix(currentTrack);
+//            for (int i = 0; i < sampler.size(); i++) {
+//                sampler[i].setParameter(16, kAudioUnitScope_Global, remix.x);
+//                sampler[i].setParameter(17, kAudioUnitScope_Global, remix.y);
+//            }
+            
 //            int prog = ofMap(remix.y, 0.0, 1.0, 0, 11);
 //            sampler.setProgram(population->getProg(currentTrack));
             
@@ -167,7 +173,7 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
                 eventCounter = 0;
                 noteOnCounter = 0;
                 
-                int endOfLoop = 960 - lastNoteTime;
+                int endOfLoop = 480 - lastNoteTime;
                 alarmMS = applyTempo(endOfLoop + currentMidiFile->getEvent(1, 0).time, currentMidiFile);
                 cout << "elapsed time " << timeCounter << " last alarm : " << alarmMS << endl;
                 timer->setAlarm(alarmMS);
