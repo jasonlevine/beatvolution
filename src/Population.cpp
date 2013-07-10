@@ -11,17 +11,18 @@
    
 // Create the population
 Population::Population(float m, int num) {
+    ofSeedRandom();
     mutationRate = m;
     generations = 0;
     for (int i = 0; i < num; i++) {
-        population.push_back(Track(DNA(), ofVec2f(50+i*75, 60)));
+        population.push_back(Track(DNA(), ofVec2f(50, 50+i*55)));
     }
 }
 
 // create all Tracks
-void Population::draw() {
+void Population::draw(int event) {
     for (int i = 0; i < population.size(); i++) {
-        population[i].draw();
+        population[i].draw(event);
     }
 }
 
@@ -80,7 +81,7 @@ void Population::reproduction() {
         // Mutate their genes
         child.mutate(mutationRate);
         // Fill the new population with the new child
-        population[i] = Track(child, ofVec2f(50+i*75, 60));
+        population[i] = Track(child, ofVec2f(50, 50+i*65));
         population[i].createMidiFile();
     }
     generations++;

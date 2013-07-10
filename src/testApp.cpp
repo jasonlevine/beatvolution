@@ -83,13 +83,12 @@ void testApp::update(){
 
 //--------------------------------------------------------------
 void testApp::draw(){
-    population->draw();
-            
-    ofDrawBitmapString("Generation #" + ofToString(population->getGenerations()), 15, 190);
+    population->draw(noteOnCounter);
     
-    ofDrawBitmapString("current track #" + ofToString(currentTrack) + " tempo = " + ofToString(tempo), 15, 10);
+    ofDrawBitmapString("Generation #" + ofToString(population->getGenerations()) + " Current Track #" + ofToString(currentTrack) + " Tempo = " + ofToString(tempo) + " noteoneCounter " + ofToString(noteOnCounter), 15, 10);
 }
 
+//--------------------------------------------------------------
 void testApp::audioOut(float *input, int bufferSize, int nChannels) {
     //play midi
     
@@ -97,10 +96,10 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
 
         if (timer->alarm()) {
 
-            cout << "contents of notePlayed" << endl;
-            for (int i  = 0; i < notesPlayed.size(); i++) {
-                cout << "note " << notesPlayed[i].note << " prog " << notesPlayed[i].prog << endl;
-            }
+//            cout << "contents of notePlayed" << endl;
+//            for (int i  = 0; i < notesPlayed.size(); i++) {
+//                cout << "note " << notesPlayed[i].note << " prog " << notesPlayed[i].prog << endl;
+//            }
             
             int note = currentMidiFile->getEvent(1, eventCounter).data[1];
             int vel = currentMidiFile->getEvent(1, eventCounter).data[2];
@@ -174,8 +173,9 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
                 noteOnCounter = 0;
                 
                 int endOfLoop = 480 - lastNoteTime;
-                alarmMS = applyTempo(endOfLoop + currentMidiFile->getEvent(1, 0).time, currentMidiFile);
-                cout << "elapsed time " << timeCounter << " last alarm : " << alarmMS << endl;
+                int event1time = currentMidiFile->getEvent(1, 0).time;
+                alarmMS = applyTempo(endOfLoop + event1time, currentMidiFile);
+                cout << "eoloop " << endOfLoop << " enevt1time " << event1time << " last alarm : " << alarmMS << endl;
                 timer->setAlarm(alarmMS);
                 timeCounter = 0.0;
                 //song done start over

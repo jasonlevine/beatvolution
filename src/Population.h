@@ -16,7 +16,7 @@ public:
     
     Population(float m, int num);
     //GUI
-    void draw();
+    void draw(int event);
     int rollover(int mouseX, int mouseY);
     //GA
     void calcFitness();

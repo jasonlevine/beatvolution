@@ -12,8 +12,10 @@
 Track::Track(DNA _dna, ofVec2f _pos) {
     dna = _dna;
     pos = _pos;
+    cout << "pos " << pos << endl;
     fitness = 1;
-    size = 70;
+    width = 960;
+    height = 60;
     playing = false;
 }
 
@@ -47,10 +49,12 @@ void Track::createMidiFile() {
 //    tempoEvent[4] = microTempo << 8;
 //    tempoEvent[5] = microTempo << 0;
 //    outputFile->addEvent(0, 0, tempoEvent);
-    
+    cout << "--------------------------------------------" << endl;
+    cout << endl << "UNsorted MIDI events" << endl;
     int actiontime = 0;      
     for (int i = 0; i < 16; i++) {
-        actiontime = tpq / 4 * int(ofMap(dna.genes[i], 0.0, 1.0, 0, 16));
+        int beat = int(ofMap(dna.genes[i], 0.0, 1.0, 0, 15));
+        actiontime = tpq / 4 * beat;
         midievent[0] = 0x9A;     // store a note on command (MIDI channel 1)
         midievent[1] = ofMap(dna.genes[i+16], 0.0, 1.0, 36, 89); //c1 to f5
         midievent[2] = ofMap(dna.genes[i+32], 0.0, 1.0, 0, 127);       // store attack/release velocity for note command
@@ -63,7 +67,7 @@ void Track::createMidiFile() {
         cout <<  actiontime << " NoteOff" << int(midievent[1]) << " " << int(midievent[2]) << endl;
     }
     
-    
+    cout << endl << "Sorted Midi tracks" << endl;
     outputFile->sortTracks();         // make sure data is in correct order
     cout << endl;
     for (int i = 0;  i < outputFile->getNumEvents(1); i++) {
@@ -74,9 +78,7 @@ void Track::createMidiFile() {
         cout  << int(outputFile->getEvent(1, i).data[1]) << " " << int(outputFile->getEvent(1, i).data[2]) << endl;
     }
     
-    
-    
-    
+
 
     
     
@@ -87,19 +89,60 @@ void Track::exportMidiFile(string name) {
     outputFile->write(filename.c_str());
 }
 
-void Track::draw() {
-    ofSetRectMode(OF_RECTMODE_CENTER);
-    if (rolloverOn) ofSetColor(0);
-    else ofSetColor(64);
+void Track::draw(int event) {
+    
+//    ofSetRectMode(OF_RECTMODE_CENTER);
+    if (rolloverOn) {
+        ofSetColor(0);
+        ofNoFill();
+        ofRect(pos.x, pos.y, width, height);
+        ofFill();
+        int eventTime = event * 60;
+        ofRect(pos.x + eventTime, pos.y, height, height);
+        
+        
+    }
 
-    ofRect(pos.x, pos.y, size, size);
+
+    //ofRect(pos.x, pos.y, width, height);
     // Display fitness value
+    
+    ofEnableAlphaBlending();
+    for (int i = 0; i < outputFile->getNumEvents(1); i++) {
+        if (outputFile->getEvent(1, i).isNoteOn()) {
+            
+            int note = outputFile->getEvent(1, i).data[1];
+            int vel = outputFile->getEvent(1, i).data[2];
+            int prog = int(dna.genes[i+48] * 3 - 0.01);
+            
+            ofColor boxCol(0, 0, 0, vel * 2);
+            switch (prog) {
+                case 0:
+                    boxCol.r = note * 2;
+                    break;
+                    
+                case 1:
+                    boxCol.g = note * 2;
+                    break;
+                    
+                case 2:
+                    boxCol.b = note * 2;
+                    break;
+                    
+            }
+            ofSetColor(boxCol);
+            int eventTime = outputFile->getEvent(1, i).time;
+            ofRect(pos.x + eventTime * 2, pos.y, height, height);
+        }
+    }
+    ofDisableAlphaBlending();
     ofSetColor(0, 0, 0);
-    ofDrawBitmapString(ofToString(fitness, 2), pos.x-size/2, pos.y+size/2 + 10);
+
+    ofDrawBitmapString(ofToString(fitness, 2), pos.x + width + 10, pos.y+height/2);
 }
 
 void Track::rollover(int mouseX, int mouseY) {
-    if (mouseX > pos.x - size / 2 && mouseX < pos.x + size / 2 && mouseY > pos.y - size / 2 && mouseY < pos.y + size / 2) {
+    if (mouseX > pos.x && mouseX < pos.x + width && mouseY > pos.y && mouseY < pos.y + height) {
         rolloverOn = true;
         fitness += 0.25;
         playing = true;

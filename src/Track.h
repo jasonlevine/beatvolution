@@ -14,7 +14,7 @@ public:
     Track(DNA _dna, ofVec2f _pos);
     void createMidiFile();
     void exportMidiFile(string name);
-    void draw();
+    void draw(int event);
     float getFitness();
     void setFitness(float fit) { fitness = fit; }
     DNA getDNA();
@@ -32,7 +32,7 @@ private:
     
     float fitness;
     ofVec2f pos;
-    int size;
+    int width, height;
     bool rolloverOn;
     MidiFile * outputFile;
     bool playing;
