@@ -40,52 +40,20 @@ void testApp::update(){
     if (thisFrameTrack != currentTrack) {
         currentTrack = thisFrameTrack;
         if (currentTrack != -1) {
-            currentMidiFile = population->getMidifile(currentTrack);
-            int currentTime = currentMidiFile->getEvent(1, 0).time;
-            float alarmMS = applyTempo(currentTime, currentMidiFile);
-            timer = new ofxTimer;
-            timer->setAlarm(alarmMS);
-            lastNoteTime = 0;
             eventCounter = 0;
-            noteOnCounter = 0;
-            timeCounter = 0.0;
-            tempo = population->getTempo(currentTrack);
-            progs.clear();
-            progs = population->getProgs(currentTrack);
-
-            
-//            ofVec2f remix = population->getRemix(currentTrack);
-//            for (int i = 0; i < sampler.size(); i++) {
-//                sampler[i].setParameter(16, kAudioUnitScope_Global, remix.x);
-//                sampler[i].setParameter(17, kAudioUnitScope_Global, remix.y);
-//            }
-            
-//            int prog = ofMap(remix.y, 0.0, 1.0, 0, 11);
-//            sampler.setProgram(population->getProg(currentTrack));
-            
-//            sampler.setParameter(16, kAudioUnitScope_Global, remix.x);
-//            sampler.setParameter(17, kAudioUnitScope_Global, remix.y);
-            
-//            int command = 0;
-//            // check for tempo
-//            for (int event = 0; event<currentMidiFile->getNumEvents(0); event++) {
-//
-//                command = currentMidiFile->getEvent(0, event).data[0] & 0xf0;
-//
-//                if (currentMidiFile->getEvent(0, event).data[0] == 0xff &&
-//                    currentMidiFile->getEvent(0, event).data[1] == 0x51) {
-//                    setTempo(*currentMidiFile, event, tempo);
-//                }
-//            }
+//            noteOnCounter = 0;
+            currentTrackMidiData = population->getMidiData(currentTrack);
+            timer = new ofxTimer;
+            timer->setAlarm(0);
         }
     }
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
-    population->draw(noteOnCounter);
+    population->draw(eventCounter);
     
-    ofDrawBitmapString("Generation #" + ofToString(population->getGenerations()) + " Current Track #" + ofToString(currentTrack) + " Tempo = " + ofToString(tempo) + " noteoneCounter " + ofToString(noteOnCounter), 15, 10);
+    ofDrawBitmapString("Generation #" + ofToString(population->getGenerations()) + " Current Track #" + ofToString(currentTrack) + " Tempo = " + ofToString(tempo) + " eventCounter " + ofToString(eventCounter), 15, 10);
 }
 
 //--------------------------------------------------------------
@@ -95,94 +63,25 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
     if (currentTrack != -1) {
 
         if (timer->alarm()) {
-
-//            cout << "contents of notePlayed" << endl;
-//            for (int i  = 0; i < notesPlayed.size(); i++) {
-//                cout << "note " << notesPlayed[i].note << " prog " << notesPlayed[i].prog << endl;
-//            }
-            
-            int note = currentMidiFile->getEvent(1, eventCounter).data[1];
-            int vel = currentMidiFile->getEvent(1, eventCounter).data[2];
-            
-            cout << "event " << eventCounter;
-            
-            if (currentMidiFile->getEvent(1, eventCounter).isNoteOn()) {
-                //int prog = ofMap(progs[noteOnCounter], 0.0, 1.0, 0, 2);
-                int prog = int(progs[noteOnCounter] * 3 - 0.01);
-                sampler[prog].midiNoteOn(note, vel);
-                notePlayed temp;
-                temp.note = note;
-                temp.prog = prog;
-                notesPlayed.push_back(temp);
-                noteOnCounter++;
-                cout << " noteON " << "prog " << prog;
-            }
-            
-            if (currentMidiFile->getEvent(1, eventCounter).isNoteOff()) {
-                int prog;
-                bool noteFound = false;
-                for (int i = 0; i < notesPlayed.size(); i++) {
-                    if (notesPlayed[i].note == note) {
-                        prog = notesPlayed[i].prog;
-                        notesPlayed.erase(notesPlayed.begin() + i);
-                        noteFound = true;
-                        break;
+            if (currentTrackMidiData[eventCounter].size() > 0) {
+                for (int i = 0; i < currentTrackMidiData[eventCounter].size(); i++) {
+                    int message = currentTrackMidiData[eventCounter][i].midiMessage;
+                    int prog = currentTrackMidiData[eventCounter][i].prog;
+                    int note = currentTrackMidiData[eventCounter][i].note;
+                    int vel = currentTrackMidiData[eventCounter][i].vel;
+                    
+                    if (message == noteOn) {
+                        sampler[prog].midiNoteOn(note, vel);
+//                        noteOnCounter++;
                     }
+                    else if (message == noteOff) sampler[prog].midiNoteOff(note, vel);
                 }
-                if (noteFound) {
-                    sampler[prog].midiNoteOff(note, vel);
-                    cout << " noteOff " << "prog " << prog;
-                }
-                else {
-                    cout << "note not found" << endl;
-                }
-                
             }
-            cout << " note " << note << "vel " << vel << endl;
-        
-            
-
-            float alarmMS;
             eventCounter++;
-            if (eventCounter < currentMidiFile->getNumEvents(1)) {
-                int currentTime = currentMidiFile->getEvent(1, eventCounter).time;
-                cout << "currentime " << currentTime << endl;
-                cout << "lastTime " << lastNoteTime << endl;
-                if (eventCounter == 0) {
-                    alarmMS = applyTempo(currentTime, currentMidiFile);
-                }
-                else {
-                    alarmMS = applyTempo(currentTime - lastNoteTime, currentMidiFile);
-                    cout << "alarmMS pre " << alarmMS << endl;
-                    alarmMS-= timer->getDiffA();
-                    cout << "alarmMS post " << alarmMS << endl << endl;
-                }
-                if (alarmMS > 0) {
-                    timer->setAlarm(alarmMS);
-                    timeCounter+=alarmMS;
-                }
-                else {
-                    timer->setAlarm(0);
-                }
-                
-                //cout << "track " << track << " event " << eventCounter[track] << " time " << alarmMS << endl;
-                lastNoteTime = currentTime;
-            }
-            else {
-                eventCounter = 0;
-                noteOnCounter = 0;
-                
-                int endOfLoop = 480 - lastNoteTime;
-                int event1time = currentMidiFile->getEvent(1, 0).time;
-                alarmMS = applyTempo(endOfLoop + event1time, currentMidiFile);
-                cout << "eoloop " << endOfLoop << " enevt1time " << event1time << " last alarm : " << alarmMS << endl;
-                timer->setAlarm(alarmMS);
-                timeCounter = 0.0;
-                //song done start over
-            }
+            eventCounter%=16;
+            timer->setAlarm(125);
         }
     }
-
 }
 
 
@@ -257,8 +156,9 @@ void testApp::mousePressed(int x, int y, int button){
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
     if (currentTrack != -1) {
-        string name = "Gen" + ofToString(population->getGenerations()) + "Track" + ofToString(currentTrack);
-        population->exportTrack(currentTrack, name);
+        if (currentTrack != -1) {
+            population->saveTrack(currentTrack, "session1");
+        }
     }
 }
 

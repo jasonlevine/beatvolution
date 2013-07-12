@@ -16,14 +16,16 @@ Population::Population(float m, int num) {
     generations = 0;
     for (int i = 0; i < num; i++) {
         population.push_back(Track(DNA(), ofVec2f(50, 50+i*55)));
+        population[i].expressGenes();
     }
 }
 
-// create all Tracks
+
 void Population::draw(int event) {
     for (int i = 0; i < population.size(); i++) {
         population[i].draw(event);
     }
+
 }
 
 // Are we rolling over any of the Tracks?
@@ -82,7 +84,7 @@ void Population::reproduction() {
         child.mutate(mutationRate);
         // Fill the new population with the new child
         population[i] = Track(child, ofVec2f(50, 50+i*65));
-        population[i].createMidiFile();
+        population[i].expressGenes();
     }
     generations++;
 }
@@ -105,6 +107,12 @@ float Population::getMaxFitness() {
 
 
 //saving
+void Population::saveTrack(int track, string name){
+    string filename = name + "gen" + ofToString(generations) + "track" + ofToString(track);
+    population[track].saveTrack(filename);
+}
+
+
 //--------------------------------------------------------------
 void Population::saveSession() {
     session.clear();
@@ -153,7 +161,7 @@ void Population::loadSession() {
         for (int j = 0; j < numGenes; j++) {
             population[i].dna.genes[j] = session.getValue("gene" + ofToString(j), 0.0);
         }
-        population[i].createMidiFile();
+        population[i].expressGenes();
         session.popTag();
     }
     session.popTag();

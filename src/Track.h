@@ -8,10 +8,19 @@
 #include "DNA.h"
 #include "MidiFile.h"
 
+enum { noteOn, noteOff };
+
+struct trackEvent {
+    int prog;
+    int midiMessage;
+    int note;
+    int vel;
+};
 
 class Track {
 public:
     Track(DNA _dna, ofVec2f _pos);
+    void expressGenes();
     void createMidiFile();
     void exportMidiFile(string name);
     void draw(int event);
@@ -25,10 +34,14 @@ public:
     ofVec2f getRemix() { return ofVec2f(remixX, remixY); }
     int getProg() { return prog; }
     vector<float> getProgs();
+    vector<vector<trackEvent> > getMidiData() { return midiData; }
+    void saveTrack(string name);
     
     DNA dna;
     
+    
 private:
+    vector<vector<trackEvent> > midiData;
     
     float fitness;
     ofVec2f pos;
@@ -39,5 +52,6 @@ private:
     float tempo;
     float remixX, remixY;
     int prog;
+    
     
 };

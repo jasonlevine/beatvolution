@@ -49,9 +49,11 @@ public:
     int         noteOnCounter;
     float       timeCounter;
     float       lastNoteTime;
-    MidiFile * currentMidiFile;
+    MidiFile *  currentMidiFile;
     vector<float> progs;
     vector<notePlayed> notesPlayed;
+    
+    vector<vector<trackEvent> > currentTrackMidiData;
     
     
     vector<ofxAudioUnitSampler> sampler;
