@@ -27,7 +27,7 @@ public:
     float getMaxFitness();
     MidiFile * getMidifile(int track) { return population[track].getMidifile(); }
     float getTempo(int track) { return population[track].getTempo(); }
-    ofVec2f getRemix(int track) { return population[track].getRemix(); }
+    vector<ofVec2f> getRemix(int track) { return population[track].getRemix(); }
     int getProg(int track) { return population[track].getProg(); }
     vector<float> getProgs( int track) { return population[track].getProgs(); }
     vector<vector<trackEvent> > getMidiData(int track) { return population[track].getMidiData(); }

@@ -9,7 +9,7 @@
 #include "DNA.h"
 
 DNA::DNA() {
-    num = 68;
+    num = 70;
     for (int i = 0; i < num; i++) {
         genes.push_back(ofRandomuf());
     }

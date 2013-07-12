@@ -43,6 +43,11 @@ void testApp::update(){
             eventCounter = 0;
 //            noteOnCounter = 0;
             currentTrackMidiData = population->getMidiData(currentTrack);
+            vector<ofVec2f> remix = population->getRemix(currentTrack);
+            for (int i = 0; i < sampler.size(); i++) {
+                sampler[i].setParameter(10, kAudioUnitScope_Global, remix[i].x);
+                sampler[i].setParameter(11, kAudioUnitScope_Global, remix[i].y);
+            }
             timer = new ofxTimer;
             timer->setAlarm(0);
         }

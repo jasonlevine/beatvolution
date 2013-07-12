@@ -205,6 +205,14 @@ DNA Track::getDNA() {
     return dna;
 }
 
+vector<ofVec2f> Track::getRemix() {
+    vector<ofVec2f> remixVecs;
+    remixVecs.push_back(ofVec2f(dna.genes[64], dna.genes[65]));
+    remixVecs.push_back(ofVec2f(dna.genes[66], dna.genes[67]));
+    remixVecs.push_back(ofVec2f(dna.genes[68], dna.genes[69]));
+    return remixVecs;
+}
+
 float Track::getFitness() {
     return fitness;
 }

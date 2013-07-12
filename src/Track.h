@@ -31,7 +31,7 @@ public:
     bool isPlaying() { return playing; }
     MidiFile * getMidifile() { return outputFile; }
     float getTempo() { return tempo; }
-    ofVec2f getRemix() { return ofVec2f(remixX, remixY); }
+    vector<ofVec2f> getRemix();
     int getProg() { return prog; }
     vector<float> getProgs();
     vector<vector<trackEvent> > getMidiData() { return midiData; }
