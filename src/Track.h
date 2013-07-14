@@ -42,7 +42,7 @@ public:
     
 private:
     vector<vector<trackEvent> > midiData;
-    
+    vector<int> lydian;
     float fitness;
     ofVec2f pos;
     int width, height;

@@ -13,6 +13,7 @@ void testApp::setup(){
     soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
     
     currentTrack = -1;
+    barCounter = 0;
     
     tempo = 120.0;
     //Audio
@@ -26,12 +27,18 @@ void testApp::setup(){
          << "sampler1 " << sampler[1].midiChannelInUse << endl
         << "sampler2 " << sampler[2].midiChannelInUse << endl;
     
-    mixer.setInputBusCount(3);
+    chords = AlchemyPlayer;
+    chords.setBank(0, 0);
+    chords.setProgram(0);
+    
+    mixer.setInputBusCount(4);
     sampler[0].connectTo(mixer, 0);
     sampler[1].connectTo(mixer, 1);
     sampler[2].connectTo(mixer, 2);
+    chords.connectTo(mixer, 3);
     mixer.connectTo(output);
     output.start();
+    
 }
 
 //--------------------------------------------------------------
@@ -42,6 +49,8 @@ void testApp::update(){
         if (currentTrack != -1) {
             eventCounter = 0;
 //            noteOnCounter = 0;
+            tempo = population->getTempo(currentTrack);
+            sixteenthNoteMs = ofMap(tempo, 60, 160, 250, 94);
             currentTrackMidiData = population->getMidiData(currentTrack);
             vector<ofVec2f> remix = population->getRemix(currentTrack);
             for (int i = 0; i < sampler.size(); i++) {
@@ -50,6 +59,14 @@ void testApp::update(){
             }
             timer = new ofxTimer;
             timer->setAlarm(0);
+        }
+        else {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 3; j++) {
+                    int note = currentTrackMidiData[16+i][j].note;
+                    chords.midiNoteOff(note, 0);
+                }
+            }
         }
     }
 }
@@ -68,6 +85,19 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
     if (currentTrack != -1) {
 
         if (timer->alarm()) {
+            if (eventCounter == 0) {
+                for (int i = 0; i < 3; i++) {
+                    int note = currentTrackMidiData[16 + barCounter][i].note;
+                    int lastBar = barCounter - 1;
+                    if (lastBar == -1) lastBar = 3;
+                    int lastNote = currentTrackMidiData[16 + lastBar][i].note;
+                    chords.midiNoteOff(note, 0);
+                    chords.midiNoteOn(note, 100);
+                }
+                barCounter++;
+                barCounter%=4;
+            }
+            
             if (currentTrackMidiData[eventCounter].size() > 0) {
                 for (int i = 0; i < currentTrackMidiData[eventCounter].size(); i++) {
                     int message = currentTrackMidiData[eventCounter][i].midiMessage;
@@ -84,7 +114,7 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
             }
             eventCounter++;
             eventCounter%=16;
-            timer->setAlarm(125);
+            timer->setAlarm(sixteenthNoteMs);
         }
     }
 }
@@ -124,7 +154,7 @@ void testApp::keyPressed(int key){
     }
     
     if (key == 's') {
-        sampler[0].showUI();
+        chords.showUI();
     }
     
     

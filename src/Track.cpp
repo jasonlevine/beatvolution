@@ -20,11 +20,22 @@ Track::Track(DNA _dna, ofVec2f _pos) {
     width = 960;
     height = 60;
     playing = false;
+    
+    lydian.assign(7, 0);
+    lydian[0] = 0;
+    lydian[1] = 2;
+    lydian[2] = 4;
+    lydian[3] = 6;
+    lydian[4] = 7;
+    lydian[5] = 9;
+    lydian[6] = 11;
+
+
 }
 
 void Track::expressGenes() {
-    midiData.assign(16, NULL);
-    
+    midiData.assign(20, NULL);
+    //beatas
     for (int i = 0; i < 16; i++) {
         int beat = int(ofMap(dna.genes[i], 0.0, 1.0, 0, 15));
         trackEvent temp;
@@ -38,8 +49,21 @@ void Track::expressGenes() {
         temp.midiMessage = noteOff;
         midiData[beat+1].push_back(temp);
     }
+    //chords
+    for (int i = 0; i < 4; i++) {
+        trackEvent temp;
+        
+        for (int j = 0; j < 3; j++) {
+            temp.prog = 4;
+            temp.midiMessage = noteOn;
+            temp.note = 60 + lydian[int(ofMap(dna.genes[i*3+j+64], 0.0, 1.0, 0, 6))];
+            temp.vel = 100;
+            midiData[16 + i].push_back(temp);
+        }
+    }
     
-    tempo = ofMap(dna.genes[64], 0.0, 1.0, 60, 160);
+    
+    tempo = ofMap(dna.genes[81], 0.0, 1.0, 60, 160);
     
 }
 

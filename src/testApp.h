@@ -47,16 +47,19 @@ public:
     ofxTimer  * timer;
     int         eventCounter;
     int         noteOnCounter;
+    int         barCounter;
     float       timeCounter;
     float       lastNoteTime;
     MidiFile *  currentMidiFile;
     vector<float> progs;
     vector<notePlayed> notesPlayed;
+    float sixteenthNoteMs;
     
     vector<vector<trackEvent> > currentTrackMidiData;
     
     
     vector<ofxAudioUnitSampler> sampler;
+    ofxAudioUnitSampler chords;
     ofxAudioUnitMixer mixer;
     ofxAudioUnitOutput  output;
 };
