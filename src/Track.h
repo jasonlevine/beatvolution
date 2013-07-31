@@ -7,6 +7,7 @@
 //
 #include "DNA.h"
 #include "MidiFile.h"
+#include "scaleRef.h"
 
 enum { noteOn, noteOff };
 
@@ -32,7 +33,7 @@ public:
     MidiFile * getMidifile() { return outputFile; }
     float getTempo() { return tempo; }
     vector<ofVec2f> getRemix();
-    int getProg() { return prog; }
+    int getProg() { return dna.genes[81]; }
     vector<float> getProgs();
     vector<vector<trackEvent> > getMidiData() { return midiData; }
     void saveTrack(string name);
@@ -42,7 +43,8 @@ public:
     
 private:
     vector<vector<trackEvent> > midiData;
-    vector<int> lydian;
+    
+    scaleRef scale;
     float fitness;
     ofVec2f pos;
     int width, height;

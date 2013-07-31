@@ -20,25 +20,12 @@
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "src/Track.cpp"
-         timestampString = "395434429.237101"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "189"
-         endingLineNumber = "189"
-         landmarkName = "Track::draw(int event)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
          filePath = "src/testApp.cpp"
-         timestampString = "395440290.908166"
+         timestampString = "396928332.417925"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "87"
-         endingLineNumber = "87"
+         startingLineNumber = "101"
+         endingLineNumber = "101"
          landmarkName = "testApp::audioOut(float *input, int bufferSize, int nChannels)"
          landmarkType = "5">
       </FileBreakpoint>

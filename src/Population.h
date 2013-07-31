@@ -32,6 +32,7 @@ public:
     vector<float> getProgs( int track) { return population[track].getProgs(); }
     vector<vector<trackEvent> > getMidiData(int track) { return population[track].getMidiData(); }
     
+    
     // Savers
     void saveTrack(int track, string name);
     void exportTrack(int track, string name);

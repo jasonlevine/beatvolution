@@ -54,6 +54,7 @@ public:
     vector<float> progs;
     vector<notePlayed> notesPlayed;
     float sixteenthNoteMs;
+    bool samplerSetupComplete;
     
     vector<vector<trackEvent> > currentTrackMidiData;
     
@@ -62,4 +63,7 @@ public:
     ofxAudioUnitSampler chords;
     ofxAudioUnitMixer mixer;
     ofxAudioUnitOutput  output;
+    
+    ofDirectory aupresets;
+    int numPresets;
 };

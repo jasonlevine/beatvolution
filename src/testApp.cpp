@@ -12,17 +12,22 @@ void testApp::setup(){
 	int sampleRate 			= 44100;
     soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
     
+
+    numPresets = aupresets.listDir("aupresets");
+    
+    
     currentTrack = -1;
     barCounter = 0;
     
     tempo = 120.0;
+    samplerSetupComplete = false;
     //Audio
     ofxAudioUnitSampler AlchemyPlayer('aumu', 'CaC2', 'CamA');
     
     sampler.assign(3, AlchemyPlayer);
-    sampler[0].loadCustomPreset("distressed_kit");
-    sampler[1].loadCustomPreset("dubstep_bio_kit");
-    sampler[2].loadCustomPreset("dubstep_drum_kit");
+    sampler[0].loadCustomPreset("distressed_kit.aupreset");
+    sampler[1].loadCustomPreset("dubstep_bio_kit.aupreset");
+    sampler[2].loadCustomPreset("dubstep_drum_kit.aupreset");
     cout << "sampler0 " << sampler[0].midiChannelInUse << endl
          << "sampler1 " << sampler[1].midiChannelInUse << endl
         << "sampler2 " << sampler[2].midiChannelInUse << endl;
@@ -30,12 +35,14 @@ void testApp::setup(){
     chords = AlchemyPlayer;
     chords.setBank(0, 0);
     chords.setProgram(0);
+//    chords.printParameterList(true, true);
     
     mixer.setInputBusCount(4);
     sampler[0].connectTo(mixer, 0);
     sampler[1].connectTo(mixer, 1);
     sampler[2].connectTo(mixer, 2);
     chords.connectTo(mixer, 3);
+    mixer.setInputVolume(0.7, 3);
     mixer.connectTo(output);
     output.start();
     
@@ -47,20 +54,27 @@ void testApp::update(){
     if (thisFrameTrack != currentTrack) {
         currentTrack = thisFrameTrack;
         if (currentTrack != -1) {
+            //samplerSetupComplete = false;
             eventCounter = 0;
 //            noteOnCounter = 0;
             tempo = population->getTempo(currentTrack);
-            sixteenthNoteMs = ofMap(tempo, 60, 160, 250, 94);
+            
+            sixteenthNoteMs = 125; //ofMap(tempo, 60, 160, 250, 94);
             currentTrackMidiData = population->getMidiData(currentTrack);
             vector<ofVec2f> remix = population->getRemix(currentTrack);
             for (int i = 0; i < sampler.size(); i++) {
                 sampler[i].setParameter(10, kAudioUnitScope_Global, remix[i].x);
                 sampler[i].setParameter(11, kAudioUnitScope_Global, remix[i].y);
             }
+            //chords.setParameter(kAudioUnitParameterUnit_BPM, kAudioUnitScope_Global, tempo);
+            int presetIndex = int(ofMap(population->getProg(currentTrack), 0.0, 1.0, 0, numPresets));
+            chords.loadCustomPreset("aupresets/" + aupresets.getName(presetIndex));
             timer = new ofxTimer;
             timer->setAlarm(0);
+            samplerSetupComplete = true;
         }
         else {
+            samplerSetupComplete = false;
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 3; j++) {
                     int note = currentTrackMidiData[16+i][j].note;
@@ -82,7 +96,7 @@ void testApp::draw(){
 void testApp::audioOut(float *input, int bufferSize, int nChannels) {
     //play midi
     
-    if (currentTrack != -1) {
+    if (currentTrack != -1 && samplerSetupComplete) {
 
         if (timer->alarm()) {
             if (eventCounter == 0) {
@@ -92,7 +106,7 @@ void testApp::audioOut(float *input, int bufferSize, int nChannels) {
                     if (lastBar == -1) lastBar = 3;
                     int lastNote = currentTrackMidiData[16 + lastBar][i].note;
                     chords.midiNoteOff(note, 0);
-                    chords.midiNoteOn(note, 100);
+                    chords.midiNoteOn(note, 50);
                 }
                 barCounter++;
                 barCounter%=4;
