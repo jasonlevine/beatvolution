@@ -33,7 +33,7 @@ public:
     MidiFile * getMidifile() { return outputFile; }
     float getTempo() { return tempo; }
     vector<ofVec2f> getRemix();
-    int getProg() { return dna.genes[81]; }
+    float getChordsProg() { return dna.genes[81]; }
     vector<float> getProgs();
     vector<vector<trackEvent> > getMidiData() { return midiData; }
     void saveTrack(string name);

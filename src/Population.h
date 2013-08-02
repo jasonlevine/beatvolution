@@ -28,8 +28,8 @@ public:
     MidiFile * getMidifile(int track) { return population[track].getMidifile(); }
     float getTempo(int track) { return population[track].getTempo(); }
     vector<ofVec2f> getRemix(int track) { return population[track].getRemix(); }
-    int getProg(int track) { return population[track].getProg(); }
     vector<float> getProgs( int track) { return population[track].getProgs(); }
+    float getChordsProg( int track) { return population[track].getChordsProg(); }
     vector<vector<trackEvent> > getMidiData(int track) { return population[track].getMidiData(); }
     
     

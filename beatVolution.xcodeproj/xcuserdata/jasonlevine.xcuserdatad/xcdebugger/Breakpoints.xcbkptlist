@@ -7,13 +7,13 @@
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "src/Population.cpp"
-         timestampString = "395284728.747868"
+         filePath = "src/testApp.cpp"
+         timestampString = "397156824.179639"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "152"
-         endingLineNumber = "152"
-         landmarkName = "Population::loadSession()"
+         startingLineNumber = "16"
+         endingLineNumber = "16"
+         landmarkName = "testApp::setup()"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -21,12 +21,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "src/testApp.cpp"
-         timestampString = "396928332.417925"
+         timestampString = "397156861.990958"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "101"
-         endingLineNumber = "101"
-         landmarkName = "testApp::audioOut(float *input, int bufferSize, int nChannels)"
+         startingLineNumber = "70"
+         endingLineNumber = "70"
+         landmarkName = "testApp::update()"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

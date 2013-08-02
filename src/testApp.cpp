@@ -59,7 +59,7 @@ void testApp::update(){
 //            noteOnCounter = 0;
             tempo = population->getTempo(currentTrack);
             
-            sixteenthNoteMs = 125; //ofMap(tempo, 60, 160, 250, 94);
+            sixteenthNoteMs = ofMap(tempo, 60, 160, 250, 94);
             currentTrackMidiData = population->getMidiData(currentTrack);
             vector<ofVec2f> remix = population->getRemix(currentTrack);
             for (int i = 0; i < sampler.size(); i++) {
@@ -67,7 +67,7 @@ void testApp::update(){
                 sampler[i].setParameter(11, kAudioUnitScope_Global, remix[i].y);
             }
             //chords.setParameter(kAudioUnitParameterUnit_BPM, kAudioUnitScope_Global, tempo);
-            int presetIndex = int(ofMap(population->getProg(currentTrack), 0.0, 1.0, 0, numPresets));
+            int presetIndex = int(ofMap(population->getChordsProg(currentTrack), 0.0, 1.0, 0, numPresets));
             chords.loadCustomPreset("aupresets/" + aupresets.getName(presetIndex));
             timer = new ofxTimer;
             timer->setAlarm(0);
